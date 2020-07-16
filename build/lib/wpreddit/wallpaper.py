@@ -69,6 +69,21 @@ def linux_wallpaper():
             check_call(["feh", "--bg-fill", path])
         elif check_de(de, ["sway"]):
             check_call(["swaymsg", "output * bg %s fill" % path])
+        elif check_de(de, ['plasma']):
+            command = """
+            qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "
+                var allDesktops = desktops();
+                print (allDesktops);
+                for (i=0;i<allDesktops.length;i++) {
+                    d = allDesktops[i];
+                    d.wallpaperPlugin = 'org.kde.image';
+                    d.currentConfigGroup = Array('Wallpaper',
+                                                'org.kde.image',
+                                                'General');
+                d.writeConfig('Image', 'file://%s')
+            }"
+            """ % path
+            check_call(command, shell=True)
         elif config.setcmd == '':
             print("Your DE could not be detected to set the wallpaper. "
                   "You need to set the 'setcommand' paramter at ~/.config/wallpaper-reddit. "
